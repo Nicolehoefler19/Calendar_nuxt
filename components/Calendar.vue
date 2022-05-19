@@ -284,22 +284,59 @@
       <section id="calendar-records">
         <div v-for="(value, name, idx) in filtered_event" :key="idx">
             <div class="row event-container">
-              <div class="col-sm-12 room-display">
-                  <p>{{ value.room }}</p>
+              <div class="col-sm-9">
+                <div class="row">
+                  <div class="col-sm-12 room-display">
+                    <p>Raum: {{ value.room }}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-2 start_time_display">
+                    <h5>{{ value.start_time }}</h5>
+                  </div>
+                  <div class="col-sm-4 title_display">
+                    <h5>{{ value.title }}</h5>
+                  </div>
+                </div>
               </div>
-              <div class="col-sm-4 start_time_display">
-                  <h5>{{ value.start_time }}</h5>
-              </div>
-              <div class="col-sm-6 title_display">
-                  <h5>{{ value.title }}</h5>
-              </div>
-              <div class="col-sm-2">
-                <p class="event-star">&#9734;</p>
+              <div class="col-sm-3">
+                <p class="event-star" v-bind:id="name" @click="favorite_event(name)">{{star}}</p>
               </div>
             </div>
         </div>
       </section>
-      <b-button id="show-btn" @click="$bvModal.show('bv-modal-events')">Event hinzufügen</b-button>
+
+      <section id="organisation">
+        <h2>
+          Für Organisatoren
+        </h2>
+        <div class="row">
+          <div v-for="(value, name, idx) in event_list" :key="idx">
+            <div class="row event-container">
+              <div class="col-sm-9">
+                <div class="row">
+                  <div class="col-sm-12 room-display">
+                    <p>{{ value.room }}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-2 start_time_display">
+                    <h5>{{ value.start_time }}</h5>
+                  </div>
+                  <div class="col-sm-4 title_display">
+                    <h5>{{ value.title }}</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <p class="remove" v-bind:id="name" @click="delete_event(name)">&#128465;</p>
+              </div>
+            </div>
+        </div>
+        </div>
+        <b-button id="show-btn" @click="$bvModal.show('bv-modal-events')">Event hinzufügen</b-button>
+
+      </section>
 
 
 
@@ -382,6 +419,8 @@
         all_vals: {},
         month_curr_number: 0,
         filtered_event: {},
+        star: "\u2606",
+        favorite_event_list: {},
       }
     },
 
@@ -429,6 +468,34 @@
         //   this.filtered_event[i] = content;
         //   console.log(this.filtered_event);
         // }
+      },
+
+      favorite_event(id){
+        var is_checked;
+        var key = id;
+        if(this.star == "\u2605"){
+          is_checked = true;
+        }
+
+        else{
+          is_checked = false;
+        }
+
+        if(is_checked == true){
+          this.star = "\u2606";
+
+          this.favorite_event_list[key] = undefined;
+          //bessere Variante key zu löschen?
+          delete this.favorite_event_list[key];
+        }
+
+        else if(is_checked == false){
+          this.star =  "\u2605";
+          this.favorite_event_list[key] = this.event_list[key];
+        }
+
+        console.log("Favorite Events:");
+        console.log(this.favorite_event_list);
       },
 
       clear_output(){
@@ -544,15 +611,22 @@
           this.event_list[new Date().valueOf()] = this.output;
         }
 
-        console.log(this.event_list);
-
         this.clear_output();
 
         //console.log(Object.keys(this.event_list).filter(idx => this.event_list[idx].date.includes('2022-05-31')));
       },
 
-      remove_event(){
+      delete_event(id){
+        var key = id;
+        this.event_list[key] = undefined;
+        this.filtered_event[key] = undefined;
+        this.favorite_event_list[key] = undefined;
+        //auch hier bessere Lösung?
+        delete this.event_list[key];
+        delete this.filtered_event[key];
+        delete this.favorite_event_list[key];
 
+        console.log(this.event_list);
       },
 
       prev(){
@@ -563,8 +637,6 @@
         else{
             this.month_curr_number--;
         }
-
-        console.log("This month is:" + this.month_curr_number);
 
         this.clear_month_data();
 
@@ -612,6 +684,12 @@
 .col-ml-1{
   min-width: 90px;
   max-width: 900px;
+}
+
+.event-star{
+  text-align: right;
+  cursor: pointer;
+  font-size: 40px;
 }
 
 .arrows{
