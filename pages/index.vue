@@ -1,5 +1,7 @@
 <template>
-  <Calendar/>
+  <div>
+    <Calendar/>
+  </div>
 </template>
 
 <script lang="ts">
